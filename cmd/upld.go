@@ -19,8 +19,10 @@ type Config struct {
 	PrivateKeyPath string `toml:"private_key_path" required:"true"`
 }
 
-var config *Config
-var client *github.Client
+var (
+	config *Config
+	client *github.Client
+)
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})

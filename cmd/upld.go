@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/google/go-github/github"
@@ -79,17 +80,17 @@ func initializeClient() (*github.Client, error) {
 func loadConfig() (config *Config, err error) {
 	file, err := os.Open("config.toml")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 
 	err = toml.NewDecoder(file).Decode(&config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode config file: %w", err)
 	}
 
 	err = file.Close()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to close config file: %w", err)
 	}
 
 	return config, nil

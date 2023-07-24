@@ -16,6 +16,7 @@ type AppConfig struct {
 type App struct {
 	jwt       string
 	createdAt time.Time
+	config    *AppConfig
 }
 
 // NewApp authenticates as a GitHub App.
@@ -34,12 +35,17 @@ func NewApp(config *AppConfig) (*App, error) {
 	return &App{
 		jwt:       signedToken,
 		createdAt: time.Now(),
+		config:    config,
 	}, nil
 }
 
 func (a *App) Do(request *http.Request) (*http.Response, error) {
 	if time.Since(a.createdAt) > tokenDuration {
-		return nil, fmt.Errorf("token expired")
+		newApp, err := NewApp(a.config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to refresh JWT token: %w", err)
+		}
+		*a = *newApp
 	}
 
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", a.jwt))

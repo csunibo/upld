@@ -6,9 +6,7 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
+	"golang.org/x/exp/slog"
 
 	csunibo "github.com/csunibo/upld/github"
 )
@@ -25,31 +23,25 @@ var (
 )
 
 func main() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	zerolog.ErrorMarshalFunc = pkgerrors.MarshalStack
 
 	var err error
 	config, err = loadConfig()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to load config")
+		slog.Error("failed to load config", "err", err)
+		os.Exit(1)
 	}
 
-	if err := intern(); err != nil {
-		log.Fatal().Stack().Err(err).Msg("error")
-	}
-}
-
-func intern() error {
-	var err error
 	client, err = initializeClient()
 	if err != nil {
-		return err
+		slog.Error("failed to initialize client", "err", err)
+		os.Exit(1)
 	}
 
 	// TODO: From here it's all testing code
 	repositories, _, err := client.Repositories.List(context.Background(), "csunibo", nil)
 	if err != nil {
-		return err
+		slog.Error("failed to list repositories", "err", err)
+		os.Exit(1)
 	}
 
 	for _, repository := range repositories {
@@ -65,12 +57,11 @@ func intern() error {
 			Body: github.String("Hello, world!"),
 		})
 	if err != nil {
-		return err
+		slog.Error("failed to create comment", "err", err)
+		os.Exit(1)
 	}
 
-	println(comment.URL)
-
-	return nil
+	slog.Info("comment created", "id", comment.GetID(), "url", comment.GetURL())
 }
 
 func initializeClient() (*github.Client, error) {
@@ -86,17 +77,17 @@ func initializeClient() (*github.Client, error) {
 }
 
 func loadConfig() (config *Config, err error) {
-	open, err := os.Open("config.toml")
+	file, err := os.Open("config.toml")
 	if err != nil {
 		return nil, err
 	}
 
-	err = toml.NewDecoder(open).Decode(&config)
+	err = toml.NewDecoder(file).Decode(&config)
 	if err != nil {
 		return nil, err
 	}
 
-	err = open.Close()
+	err = file.Close()
 	if err != nil {
 		return nil, err
 	}

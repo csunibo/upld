@@ -1,3 +1,5 @@
+// Inspired by https://sharmarajdaksh.github.io/blog/github-oauth-with-go
+
 package main
 
 import (

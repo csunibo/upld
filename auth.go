@@ -18,76 +18,63 @@ type GithubData struct {
 	authorized bool
 }
 
-func getGithubClientID() (string, error) {
+// Represents the request we send to Github
+type GithubAccessTokenRequest struct {
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	Code         string `json:"code"`
+}
+
+// Represents the response received from Github
+type GithubAccessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	Scope       string `json:"scope"`
+}
+
+func getGithubAccessToken(code string) (string, error) {
 	githubClientID, exists := os.LookupEnv("CLIENT_ID")
 
 	if !exists {
 		return "", errors.New("Github client id not existing")
 	}
 
-	return githubClientID, nil
-}
-
-func getGithubClientSecret() (string, error) {
-
 	githubClientSecret, exists := os.LookupEnv("CLIENT_SECRET")
 	if !exists {
 		return "", errors.New("Github client secret not existing")
 	}
 
-	return githubClientSecret, nil
-}
-
-func getGithubAccessToken(code string) (string, error) {
-
-	clientID, idErr := getGithubClientID()
-	if idErr != nil {
-		return "", idErr
+	requestBody := GithubAccessTokenRequest{
+		ClientId:     githubClientID,
+		ClientSecret: githubClientSecret,
+		Code:         code,
+	}
+	requestJSON, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", fmt.Errorf("Could not serialize JSON request: %v", err)
 	}
 
-	clientSecret, secretErr := getGithubClientSecret()
-	if secretErr != nil {
-		return "", secretErr
-	}
-
-	requestBodyMap := map[string]string{
-		"client_id":     clientID,
-		"client_secret": clientSecret,
-		"code":          code,
-	}
-	requestJSON, _ := json.Marshal(requestBodyMap)
-
-	req, reqErr := http.NewRequest(
+	req, err := http.NewRequest(
 		"POST",
 		"https://github.com/login/oauth/access_token",
 		bytes.NewBuffer(requestJSON),
 	)
-	if reqErr != nil {
-		return "", reqErr
+	if err != nil {
+		return "", fmt.Errorf("Error while constructing the request to GitHub: %v", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-
 	res, resErr := http.DefaultClient.Do(req)
 	if resErr != nil {
-		return "", resErr
+		return "", fmt.Errorf("Error while sending the request to GitHub: %v", err)
 	}
 
-	// Response body converted to stringified JSON
-	resBody, _ := ioutil.ReadAll(res.Body)
-
-	// Represents the response received from Github
-	type GithubAccessTokenResponse struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		Scope       string `json:"scope"`
-	}
-
-	// Convert stringified JSON to a struct object of type
-	// GithubAccessTokenResponse
 	var githubRes GithubAccessTokenResponse
-	json.Unmarshal(resBody, &githubRes)
+	err = json.NewDecoder(res.Body).Decode(&githubRes)
+	if err != nil {
+		return "", fmt.Errorf("Error while parsing GitHub's response: %v", err)
+	}
 
 	return githubRes.AccessToken, nil
 }

@@ -73,7 +73,7 @@ func getGithubAccessToken(code string) (string, error) {
 	var githubRes GithubAccessTokenResponse
 	err = json.NewDecoder(res.Body).Decode(&githubRes)
 	if err != nil {
-		return "", fmt.Errorf("Error while parsing GitHub's response: %v", err)
+		return "", fmt.Errorf("Error while parsing GitHub's response: %w", err)
 	}
 
 	return githubRes.AccessToken, nil

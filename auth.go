@@ -67,7 +67,7 @@ func getGithubAccessToken(code string) (string, error) {
 	req.Header.Set("Accept", "application/json")
 	res, resErr := http.DefaultClient.Do(req)
 	if resErr != nil {
-		return "", fmt.Errorf("Error while sending the request to GitHub: %v", err)
+		return "", fmt.Errorf("Error while sending the request to GitHub: %w", err)
 	}
 
 	var githubRes GithubAccessTokenResponse

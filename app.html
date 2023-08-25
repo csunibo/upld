@@ -1,0 +1,86 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <p>
+      Questa pagina dovrebbe fare la fork di una repo, aggiungere un file, e fare il pr sulla repo originale,
+      apri la console per vedere cosa succede
+
+    </p>
+    <script type='module'>
+    import { Octokit } from "https://esm.sh/@octokit/core";
+    const auth='ACCESS_TOKEN'
+    const octokit = new Octokit({ auth })
+
+    const fork= async (owner,repo)=>{
+      const res = await octokit.request('POST /repos/{owner}/{repo}/forks', {
+        owner,
+        repo,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      })
+
+      return {repo:res.data.name,name:res.data.owner.login}
+    }
+
+    const getRepo= async (owner,repo)=>{
+      try{
+        const res = await octokit.request('GET /repos/{owner}/{repo}', {
+          owner,
+          repo,
+          headers: {
+            'X-GitHub-Api-Version': '2022-11-28'
+          }
+        })
+        return true;
+      }catch(e){
+        return false
+      }
+    }
+    const FromUser='csunibo'
+    const FromRepo= 'fisica'
+    const {repo,name} =await fork(FromUser,FromRepo)
+    console.log('forkata ')
+    console.log(repo)
+    console.log(name)
+    console.log('in attesa che il fork abbia effetto')
+
+     do{
+         await (new Promise(resolve => setTimeout(resolve, 10000)))
+       console.log('checking if exists')
+     } while(!getRepo(name,repo));
+     console.log('find that bitch')
+ 
+     
+   await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+     owner:name,
+     repo:repo ,
+     path: 'prova.txt',
+     message: 'my commit message',
+     content: 'bXkgbmV3IGZpbGUgY29udGVudHM=',
+     headers: {
+       'X-GitHub-Api-Version': '2022-11-28'
+     }
+   })
+     console.log('add content')
+
+    const res=await octokit.request('POST /repos/{owner}/{repo}/pulls', {
+      owner:FromUser ,
+      repo: FromRepo,
+      title: 'Amazing new feature',
+      body: 'Please pull these awesome changes in!',
+      base: 'main',
+      head: `${name}:main`,
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    })
+    console.log(res)
+    console.log('finish')
+
+
+    </script>
+  </body>
+</html>
+

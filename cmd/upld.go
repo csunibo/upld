@@ -16,8 +16,9 @@ import (
 )
 
 type Config struct {
-	Listen  string `toml:"listen"`
-	BaseURL string `toml:"base_url"`
+	Listen     string   `toml:"listen"`
+	BaseURL    string   `toml:"base_url"`
+	ClientURLs []string `toml:"client_urls"`
 
 	AppID          string `toml:"app_id" required:"true"`
 	InstallationID string `toml:"installation_id" required:"true"`
@@ -92,12 +93,16 @@ func main() {
 		Expiration:   config.OAuthSessionDuration,
 	})
 
-	http.HandleFunc("/login", authenticator.LoginHandler)
-	http.HandleFunc("/login/callback", authenticator.CallbackHandler)
-	http.HandleFunc("/whoami", authenticator.WhoamiHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/login", authenticator.LoginHandler)
+	mux.HandleFunc("/login/callback", authenticator.CallbackHandler)
+	mux.HandleFunc("/whoami", authenticator.WhoAmIHandler)
 
-	slog.Info("Listening", "address")
-	http.ListenAndServe("0.0.0.0:3000", nil)
+	slog.Info("listening at", "address", config.Listen)
+	err = http.ListenAndServe(config.Listen, CorsHeader(CorsConfig{config.ClientURLs, true})(mux))
+	if err != nil {
+		slog.Error("failed to serve", "err", err)
+	}
 }
 
 func initializeClient() (*github.Client, error) {

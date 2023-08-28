@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "upld description",
+    "license": {
+      "name": "AGPL",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    },
+    "version": "1.0.11"
+  },
+  "servers": [
+    {
+      "url": "https://upld.risorse.students.cs.unibo.it"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "get": {
+        "summary": "Login a user via GitHub",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "redirect_uri",
+            "required": true,
+            "description": "The url to be redirected when the auth is successful. In the redirect response, it will also set the cookie and relative expiry date for the upld domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "If any of the required params is not defined."
+          },
+          "303": {
+            "description": "Redirect to the GitHub login page"
+          }
+        }
+      }
+    },
+    "/whoami": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Returns some information about the logged in user",
+        "responses": {
+          "200": {
+            "description": "User information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "octopus",
+                      "description": "The github username."
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "description": "The github profile picture url."
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Octopus Smith",
+                      "description": "The github user set name."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The user is not logged in. You need to first redirect to the /login route."
+          }
+        }
+      }
+    }
+  }
+}

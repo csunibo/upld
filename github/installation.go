@@ -16,7 +16,7 @@ const githubAccessTokensFormatUrl = githubApiUrl + "/app/installations/%s/access
 func (a *App) AuthenticateAsInstallation(installationId string) (*github.Client, error) {
 	url := fmt.Sprintf(githubAccessTokensFormatUrl, installationId)
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

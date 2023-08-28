@@ -93,13 +93,17 @@ func main() {
 		Expiration:   config.OAuthSessionDuration,
 	})
 
+	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/login", authenticator.LoginHandler)
 	mux.HandleFunc("/login/callback", authenticator.CallbackHandler)
 	mux.HandleFunc("/whoami", authenticator.WhoAmIHandler)
 
+	// Middlewares
+	handler := NewCors(config.ClientURLs, true, mux)
+
 	slog.Info("listening at", "address", config.Listen)
-	err = http.ListenAndServe(config.Listen, CorsHeader(CorsConfig{config.ClientURLs, true})(mux))
+	err = http.ListenAndServe(config.Listen, handler)
 	if err != nil {
 		slog.Error("failed to serve", "err", err)
 	}

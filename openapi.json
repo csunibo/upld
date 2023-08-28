@@ -14,16 +14,17 @@
     }
   ],
   "paths": {
-    "/callback": {
-      "post": {
+    "/login": {
+      "get": {
+        "summary": "Login a user via GitHub",
         "tags": [
           "auth"
         ],
-        "summary": "Callback received from the GitHub OAuth2 flow",
         "parameters": [
           {
             "in": "query",
-            "name": "redirect",
+            "name": "redirect_uri",
+            "required": true,
             "description": "The url to be redirected when the auth is successful. In the redirect response, it will also set the cookie and relative expiry date for the upld domain.",
             "schema": {
               "type": "string"
@@ -31,29 +32,21 @@
           }
         ],
         "responses": {
-          "302": {
-            "description": "Redirect to the GitHub Login page"
+          "400": {
+            "description": "If any of the required params is not defined."
+          },
+          "303": {
+            "description": "Redirect to the GitHub login page"
           }
         }
       }
     },
-    "/me": {
+    "/whoami": {
       "get": {
         "tags": [
           "auth"
         ],
         "summary": "Returns some information about the logged in user",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "Authorization",
-            "schema": {
-              "type": "string",
-              "format": "bearer"
-            },
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "User information",
@@ -64,11 +57,17 @@
                   "properties": {
                     "username": {
                       "type": "string",
+                      "example": "octopus",
                       "description": "The github username."
                     },
-                    "picture": {
+                    "avatarUrl": {
                       "type": "string",
                       "description": "The github profile picture url."
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Octopus Smith",
+                      "description": "The github user set name."
                     }
                   }
                 }
@@ -76,7 +75,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "The user is not logged in. You need to first redirect to the /login route."
           }
         }
       }

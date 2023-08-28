@@ -1,3 +1,11 @@
+listen = "0.0.0.0:3000"
+base_url = "http://localhost:3000"
+client_urls = ["http://localhost:5173"]
+
 installation_id = ""
 app_id = ""
 private_key_path = ""
+
+oauth_client_id = ""
+oauth_client_secret = ""
+oauth_signing_key = "supersecretpassword"

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"golang.org/x/exp/slices"
 	"net/http"
+
+	"golang.org/x/exp/slices"
 )
 
 type CorsMiddleware struct {

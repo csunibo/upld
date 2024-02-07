@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/csunibo/upld/util"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
 )
 
 func (a *Authenticator) RequireJWTCookie(w http.ResponseWriter, r *http.Request) (*jwt.Token, error) {

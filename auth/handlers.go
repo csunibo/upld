@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"github.com/csunibo/upld/util"
-	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/exp/slog"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/csunibo/upld/util"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/exp/slog"
 )
 
 func (a *Authenticator) WhoAmIHandler(res http.ResponseWriter, req *http.Request) {
@@ -101,7 +102,7 @@ func (a *Authenticator) LoginHandler(res http.ResponseWriter, req *http.Request)
 	// Get the client redirect url
 	clientRedirectURL := req.URL.Query().Get("redirect_uri")
 	if clientRedirectURL == "" {
-		_ = util.WriteError(res, http.StatusBadRequest, "specify a redirect_url url param")
+		_ = util.WriteError(res, http.StatusBadRequest, "specify a redirect_uri url param")
 		return
 	}
 

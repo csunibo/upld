@@ -98,6 +98,7 @@ func main() {
 	mux.HandleFunc("/login", authenticator.LoginHandler)
 	mux.HandleFunc("/login/callback", authenticator.CallbackHandler)
 	mux.HandleFunc("/whoami", authenticator.WhoAmIHandler)
+	mux.HandleFunc("/upld", authenticator.UpldFile)
 
 	// Middlewares
 	handler := NewCors(config.ClientURLs, true, mux)
